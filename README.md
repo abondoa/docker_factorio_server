@@ -1,14 +1,17 @@
 # Factorio [![Docker Pulls](https://img.shields.io/docker/pulls/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/) [![Docker Stars](https://img.shields.io/docker/stars/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/)
 
-* `0.14.21`, `0.14`, `latest`, 'stable' [(0.14/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.14/Dockerfile)
+* `0.15.1`, `0.15`, `latest` [(0.15/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.15/Dockerfile)
+* `0.14.23`, `0.14`, `stable` [(0.14/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.14/Dockerfile)
 * `0.13.20`, `0.13`  [(0.13/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.13/Dockerfile)
 
-*Tag philosophy*
+*Tags*
 
 * `latest` - highest version: may be experimental.
 * `stable` - highest version declared stable.
 * `0.x` - highest version in a branch: may be experimental.
 * `0.x.y` - a specific version.
+* `0.x-dev` - whatever is in master for that version.
+
 
 # What is Factorio?
 
@@ -117,6 +120,11 @@ To keep things simple, the container uses a single volume mounted at `/factorio`
 * `27015/tcp` - RCON (optional).
 
 
+## Environment Variables
+
+* `PORT` - Start the server on an alterate port, .e.g. `docker run -e "PORT=34198"`.
+
+
 ## Troubleshooting
 
 **My server is listed in the server browser, but nobody can connect**
@@ -126,6 +134,10 @@ Check the logs. If there is the line `Own address is RIGHT IP:WRONG PORT`, then 
 By default, Docker routes traffic through a proxy. The proxy changes the source UDP port, so the wrong port is detected. See the forum post *[Incorrect port detected for docker hosted server](https://forums.factorio.com/viewtopic.php?f=49&t=35255)* for details.
 
 To fix the incorrect port, start the Docker service with the `--userland-proxy=false` switch. Docker will route traffic with iptables rules instead of a proxy. Add the switch to the `DOCKER_OPTS` environment variable or `ExecStart` in the Docker systemd service definition. The specifics vary by operating system.
+
+**When I run a server on a port besides 34197 nobody can connect from the server browser**
+
+Use the `PORT` environment variable to start the server on the a different port, .e.g. `docker run -e "PORT=34198"`. This changes the source port on the packets used for port detection. `-p 34198:34197` works fine for private servers, but the server browser detects the wrong port.
 
 
 # Credits
