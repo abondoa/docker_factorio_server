@@ -1,10 +1,10 @@
-# Factorio [![Docker Pulls](https://img.shields.io/docker/pulls/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/) [![Docker Stars](https://img.shields.io/docker/stars/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/)
+# Factorio [![](https://images.microbadger.com/badges/image/dtandersen/factorio.svg)](https://microbadger.com/images/dtandersen/factorio "Get your own image badge on microbadger.com") [![Docker Pulls](https://img.shields.io/docker/pulls/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/) [![Docker Stars](https://img.shields.io/docker/stars/dtandersen/factorio.svg)](https://hub.docker.com/r/dtandersen/factorio/)
 
-* `0.15.1`, `0.15`, `latest` [(0.15/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.15/Dockerfile)
+* `0.15.3`, `0.15`, `latest` [(0.15/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.15/Dockerfile)
 * `0.14.23`, `0.14`, `stable` [(0.14/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.14/Dockerfile)
 * `0.13.20`, `0.13`  [(0.13/Dockerfile)](https://github.com/dtandersen/docker_factorio_server/blob/master/0.13/Dockerfile)
 
-*Tags*
+*Tag descriptions*
 
 * `latest` - highest version: may be experimental.
 * `stable` - highest version declared stable.
@@ -67,6 +67,31 @@ docker start factorio
 Try to connect to the server. Check the logs if it isn't working.
 
 
+## Console
+
+To issue console commands to the server, start the server in interactive mode with `-it`. Open the console with `docker attach` and then type commands.
+
+	docker run -d -it  \
+        --name factorio \
+        dtandersen/factorio
+	docker attach factorio
+
+
+## Upgrading
+
+Before upgrading backup the save. It's easy to make a save in the client.
+
+Ensure `-v` was used to run the server so the save is outside of the Docker container. The `docker rm` command completely destroys the container, which includes the save if it isn't stored in an data volume.
+
+Delete the container and refresh the image:
+
+	docker stop factorio
+	docker rm factorio
+	docker pull dtandersen/factorio
+
+Now run the server as before. In about a minute the new version of Factorio should be up and running, complete with saves and config!
+
+
 ## Saves
 
 A new map named `_autosave1.zip` is generated the first time the server is started. The `map-gen-settings.json` file in `/tmp/factorio/config` is used for the map settings. On subsequent runs the newest save is used.
@@ -85,10 +110,19 @@ Copy mods into the mods folder and restart the server.
 
 Set the RCON password in the `rconpw` file. A random password is generated if `rconpw` doesn't exist.
 
-To change the password stop the server, modify `rconpw`, and restart the server.
+To change the password, stop the server, modify `rconpw`, and restart the server.
 
-To "disable" RCON don't expose port 27015, i.e. start the server with `-p 34197:34197/udp` instead of `-P`. RCON still runs, but nobody is able to connect to it.
+To "disable" RCON don't expose port 27015, i.e. start the server without `-p 27015:27015/tcp`. RCON is still running, but nobody can to connect to it.
 
+
+## Whitelisting (0.15.3+)
+
+Create file `config/server-whitelist.json` and add the whitelisted users.
+
+    [
+		"you",
+		"friend"
+	]
 
 # Container Details
 
@@ -107,7 +141,8 @@ To keep things simple, the container uses a single volume mounted at `/factorio`
     |-- config
     |   |-- map-gen-settings.json
     |   |-- rconpw
-    |   `-- server-settings.json
+    |   |-- server-settings.json
+    |   `-- server-whitelist.json
     |-- mods
     |   `-- fancymod.zip
     `-- saves
@@ -116,13 +151,13 @@ To keep things simple, the container uses a single volume mounted at `/factorio`
 
 ## Ports
 
-* `34197/udp` - Factorio clients (required).
+* `34197/udp` - Game server (required).
 * `27015/tcp` - RCON (optional).
 
 
 ## Environment Variables
 
-* `PORT` - Start the server on an alterate port, .e.g. `docker run -e "PORT=34198"`.
+* `PORT` (0.15+) - Start the server on an alterate port, .e.g. `docker run -e "PORT=34198"`.
 
 
 ## Troubleshooting
@@ -140,9 +175,10 @@ To fix the incorrect port, start the Docker service with the `--userland-proxy=f
 Use the `PORT` environment variable to start the server on the a different port, .e.g. `docker run -e "PORT=34198"`. This changes the source port on the packets used for port detection. `-p 34198:34197` works fine for private servers, but the server browser detects the wrong port.
 
 
-# Credits
+# Contributors
 
-Ideas borrowed from:
-
-* [Zopanix](https://github.com/zopanix/docker_factorio_server)
-* [Rfvgyhn](https://github.com/Rfvgyhn/docker-factorio)
+* [dtandersen](https://github.com/dtandersen/docker_factorio_server) - Maintainer
+* [Zopanix](https://github.com/zopanix/docker_factorio_server) - Originator
+* [Rfvgyhn](https://github.com/Rfvgyhn/docker-factorio) - Randomly generate RCON password
+* [gnomus](https://github.com/gnomus/docker_factorio_server) - White listing
+* [jaredledvina](https://github.com/jaredledvina/docker_factorio_server) - Version update
